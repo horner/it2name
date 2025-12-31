@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -e
+
+# Defaults
+FG="white"
+BG="black"
+TEXT=""
+
+# Parse args
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --fgcolor)
+      FG="$2"
+      shift 2
+      ;;
+    --bgcolor)
+      BG="$2"
+      shift 2
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+    *)
+      TEXT="$1"
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$TEXT" ]]; then
+  echo "Usage: name [--fgcolor COLOR] [--bgcolor COLOR] \"Your Text\"" >&2
+  exit 1
+fi
+
+# If the TEXT is just . then we want just show the folder name
+if [[ "$TEXT" == "." ]]; then
+  TEXT="$(basename "$PWD")"
+fi
+
+# Detect terminal size using stty (most reliable in subshells)
+if read ROWS COLS < <(stty size </dev/tty 2>/dev/null); then
+  : # success
+else
+  COLS=${COLUMNS:-120}
+  ROWS=${LINES:-40}
+fi
+
+# Calculate image dimensions based on terminal size
+# chafa uses ~2 rows per character height, and ~1 col per character width
+IMG_W=$((COLS * 10))
+IMG_H=$((ROWS * 20))
+
+magick \
+  -background "$BG" \
+  -fill "$FG" \
+  -font Helvetica-Bold \
+  -gravity center \
+  -size "${IMG_W}x${IMG_H}" \
+  caption:"$TEXT" \
+  png:- \
+| chafa --symbols block --colors full --size "${COLS}x${ROWS}"
+
+# Set iTerm2 session/tab name
+printf '\e]1;%s\a' "$TEXT"
+# echo out the pwd to stdout
+pwd
+
