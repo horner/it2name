@@ -2,6 +2,12 @@
 
 A simple iTerm2 helper that renders big ASCII art captions and sets the terminal tab title.
 
+## Demo
+
+![it2name demo](it2term.png)
+
+📹 [Watch video demo](https://youtube.com/shorts/ENH4IveFZEo) 
+
 ## What it does
 
 `it2name` takes text input and:
