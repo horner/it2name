@@ -1,14 +1,52 @@
 #!/usr/bin/env bash
 set -e
 
+VERSION="0.1.0"
+
 # Defaults
 FG="white"
 BG="black"
 TEXT=""
 
+show_version() {
+  echo "it2name version $VERSION"
+  exit 0
+}
+
+show_help() {
+  cat <<EOF
+it2name - iTerm2 caption renderer and tab name setter
+
+Usage: it2name [OPTIONS] TEXT
+
+Arguments:
+  TEXT                    Text to render (use "." for current directory name)
+
+Options:
+  --fgcolor COLOR        Set foreground/text color (default: white)
+  --bgcolor COLOR        Set background color (default: black)
+  --version              Show version information
+  --help                 Show this help message
+
+Examples:
+  it2name "Hello World"
+  it2name .
+  it2name --fgcolor red --bgcolor black "Production"
+
+Colors: Any ImageMagick-supported color name (red, blue, green, yellow, etc.)
+EOF
+  exit 0
+}
+
 # Parse args
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --version)
+      show_version
+      ;;
+    --help|-h)
+      show_help
+      ;;
     --fgcolor)
       FG="$2"
       shift 2
@@ -29,7 +67,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$TEXT" ]]; then
-  echo "Usage: name [--fgcolor COLOR] [--bgcolor COLOR] \"Your Text\"" >&2
+  echo "Error: TEXT argument is required" >&2
+  echo "Usage: it2name [--fgcolor COLOR] [--bgcolor COLOR] TEXT" >&2
+  echo "Try 'it2name --help' for more information." >&2
   exit 1
 fi
 
