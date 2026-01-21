@@ -78,6 +78,14 @@ if [[ "$TEXT" == "." ]]; then
   TEXT="$(basename "$PWD")"
 fi
 
+# Check if we're in a git repository and on a non-main branch
+if git rev-parse --git-dir >/dev/null 2>&1; then
+  BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [[ -n "$BRANCH" && "$BRANCH" != "main" ]]; then
+    TEXT="$TEXT [$BRANCH]"
+  fi
+fi
+
 # Detect terminal size using stty (most reliable in subshells)
 if read ROWS COLS < <(stty size </dev/tty 2>/dev/null); then
   : # success
