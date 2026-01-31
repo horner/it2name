@@ -99,7 +99,7 @@ fi
 IMG_W=$((COLS * 10))
 IMG_H=$((ROWS * 20))
 
-magick \
+/opt/homebrew/opt/imagemagick-full/bin/magick \
   -background "$BG" \
   -fill "$FG" \
   -font Helvetica-Bold \

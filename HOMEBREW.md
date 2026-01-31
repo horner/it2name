@@ -7,7 +7,7 @@ brew install horner/tap/it2name
 ```
 
 This will automatically install `it2name` along with its dependencies:
-- **imagemagick** - for text rendering
+- **imagemagick-full** - for text rendering with Freetype font support
 - **chafa** - for terminal graphics
 
 ## Tap Repository
