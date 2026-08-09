@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION="0.2.1"
+VERSION="0.2.2"
 
 # Defaults
 FG="white"
@@ -117,8 +117,9 @@ fi
   -gravity center \
   -size "${IMG_W}x${IMG_H}" \
   caption:"$TEXT" \
+  -trim +repage \
   png:- \
-| chafa --symbols block --colors full --size "${COLS}x${ROWS}"
+| chafa --symbols block --colors full --stretch --size "${COLS}x${ROWS}"
 
 # Set iTerm2 session/tab name
 printf '\e]1;%s\a' "$TEXT"
