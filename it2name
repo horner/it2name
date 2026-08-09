@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION="0.1.0"
+VERSION="0.2.1"
 
 # Defaults
 FG="white"
@@ -99,7 +99,18 @@ fi
 IMG_W=$((COLS * 10))
 IMG_H=$((ROWS * 20))
 
-/opt/homebrew/opt/imagemagick-full/bin/magick \
+# imagemagick-full is keg-only; look up its prefix instead of assuming a fixed
+# path (differs across Apple Silicon, Intel, and Linuxbrew installs), falling
+# back to whatever "magick" is on PATH.
+MAGICK_BIN="magick"
+if command -v brew >/dev/null 2>&1; then
+  FULL_PREFIX="$(brew --prefix imagemagick-full 2>/dev/null)"
+  if [[ -n "$FULL_PREFIX" && -x "$FULL_PREFIX/bin/magick" ]]; then
+    MAGICK_BIN="$FULL_PREFIX/bin/magick"
+  fi
+fi
+
+"$MAGICK_BIN" \
   -background "$BG" \
   -fill "$FG" \
   -font Helvetica-Bold \
