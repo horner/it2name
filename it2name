@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION="0.2.3"
+VERSION="0.2.4"
 
 # Defaults
 FG="white"
@@ -94,10 +94,10 @@ else
   ROWS=${LINES:-40}
 fi
 
-# Calculate image dimensions based on terminal size
-# chafa uses ~2 rows per character height, and ~1 col per character width
-IMG_W=$((COLS * 10))
-IMG_H=$((ROWS * 20))
+# Calculate image dimensions based on terminal size. Render at 3x so the
+# image stays crisp when iTerm2 scales it up to full window width on Retina.
+IMG_W=$((COLS * 30))
+IMG_H=$((ROWS * 60))
 
 # imagemagick-full is keg-only; look up its prefix instead of assuming a fixed
 # path (differs across Apple Silicon, Intel, and Linuxbrew installs), falling
@@ -110,18 +110,29 @@ if command -v brew >/dev/null 2>&1; then
   fi
 fi
 
-"$MAGICK_BIN" \
-  -background "$BG" \
-  -fill "$FG" \
-  -font Helvetica-Bold \
-  -gravity center \
-  -size "${IMG_W}x${IMG_H}" \
-  caption:"$TEXT" \
-  -trim +repage \
-  -resize "${IMG_W}x${IMG_H}" \
-  -gravity center -background "$BG" -extent "${IMG_W}x${IMG_H}" \
-  png:- \
-| chafa --symbols block --colors full --size "${COLS}x${ROWS}"
+# Render the caption on a large canvas and trim to the text's bounding box.
+render_caption() {
+  "$MAGICK_BIN" \
+    -background "$BG" \
+    -fill "$FG" \
+    -font Helvetica-Bold \
+    -gravity center \
+    -size "${IMG_W}x${IMG_H}" \
+    caption:"$TEXT" \
+    -trim +repage \
+    png:-
+}
+
+if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+  # iTerm2's inline-image protocol scales to the window itself (width=100%,
+  # aspect preserved), which is the only reliable way to fill the terminal:
+  # chafa's image-mode output is stuck at the PNG's native pixel size.
+  printf '\e]1337;File=inline=1;width=100%%;preserveAspectRatio=1:%s\a\n' \
+    "$(render_caption | base64 | tr -d '\n')"
+else
+  render_caption \
+  | chafa --symbols block --colors full --center on --scale max --size "${COLS}x${ROWS}"
+fi
 
 # Set iTerm2 session/tab name
 printf '\e]1;%s\a' "$TEXT"
